@@ -1,9 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "name in manifest.json",
-  "description": "description in manifest.json",
-  "options_ui": {
-    "page": "src/pages/options/index.html"
+  "name": "Focus Block",
+  "description": "Block sites by schedule or with Pomodoro to avoid distractions",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "oscar.dga@outlook.com"
+    }
   },
   "action": {
     "default_popup": "src/pages/popup/index.html",
@@ -11,39 +13,21 @@
       "32": "icon-32.png"
     }
   },
-  "chrome_url_overrides": {
-    "newtab": "src/pages/newtab/index.html"
-  },
   "icons": {
     "128": "icon-128.png"
   },
-  "permissions": [
-    "activeTab"
-  ],
+  "permissions": ["activeTab", "storage", "alarms", "notifications"],
   "content_scripts": [
     {
-      "matches": [
-        "http://*/*",
-        "https://*/*",
-        "<all_urls>"
-      ],
-      "js": [
-        "src/pages/content/index.tsx"
-      ],
-      "css": [
-        "contentStyle.css"
-      ]
+      "matches": ["<all_urls>"],
+      "js": ["src/pages/content/index.tsx"],
+      "all_frames": true
     }
   ],
-  "devtools_page": "src/pages/devtools/index.html",
   "web_accessible_resources": [
     {
-      "resources": [
-        "contentStyle.css",
-        "icon-128.png",
-        "icon-32.png"
-      ],
-      "matches": []
+      "resources": ["icon-128.png", "icon-32.png", "src/pages/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

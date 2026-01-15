@@ -8,12 +8,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "contentStyle.css",
-        "dev-icon-128.png",
-        "dev-icon-32.png"
-      ],
-      "matches": []
+      "resources": ["dev-icon-128.png", "dev-icon-32.png", "src/pages/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

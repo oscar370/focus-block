@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+  --pico-border-radius: 0.75rem;
+
+  --pico-background-color: #ffffff;
+  --pico-color: #09090b;
+  --pico-muted-color: #71717a;
+  --pico-muted-background-color: #f4f4f5;
+  --pico-border-color: #e4e4e7;
+
+  --pico-card-background-color: #f8f8f8;
+  --pico-card-border-color: #e4e4e7;
+  --pico-card-sectioning-background-color: #f8f8f8;
+
+  --pico-form-element-background-color: #ffffff;
+  --pico-form-element-border-color: #e4e4e7;
+  --pico-form-element-active-border-color: #09090b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --pico-background-color: #09090b;
+    --pico-color: #fafafa;
+    --pico-muted-color: #a1a1aa;
+    --pico-muted-background-color: #18181b;
+    --pico-border-color: #27272a;
+
+    --pico-card-background-color: #161616;
+    --pico-card-border-color: #3f3f46;
+    --pico-card-sectioning-background-color: #161616;
+
+    --pico-form-element-background-color: #09090b;
+    --pico-form-element-border-color: #27272a;
+    --pico-form-element-active-border-color: #52525b;
+  }
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
