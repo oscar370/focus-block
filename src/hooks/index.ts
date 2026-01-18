@@ -116,13 +116,17 @@ export function usePause() {
 }
 
 export function usePomodoro() {
+  const [isLoading, setLoading] = useState(true);
   const [pomodoro, setPomodoroState] = useState<PomodoroState>({
     status: "idle",
     expiry: null,
   });
 
   useEffect(() => {
-    getPomodoroState().then(setPomodoroState);
+    getPomodoroState().then((value) => {
+      setPomodoroState(value);
+      setLoading(false);
+    });
 
     function handleChange(changes: any) {
       if (changes.pomodoro) setPomodoroState(changes.pomodoro.newValue);
@@ -154,7 +158,7 @@ export function usePomodoro() {
     api.alarms.clear("badgeTicker");
   }
 
-  return { pomodoro, startWork, stopPomodoro };
+  return { pomodoro, isLoading, startWork, stopPomodoro };
 }
 
 async function setPomodoro(pomodoro: PomodoroState) {

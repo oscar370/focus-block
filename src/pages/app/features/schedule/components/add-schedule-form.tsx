@@ -40,7 +40,7 @@ const daysInputs: DaysInputs[] = [
 ];
 
 export function AddScheduleForm() {
-  const { register, handleSubmit } = useForm<Schedule>();
+  const { register, handleSubmit, reset } = useForm<Schedule>();
 
   async function onSubmit(data: Schedule) {
     try {
@@ -55,6 +55,7 @@ export function AddScheduleForm() {
         id: crypto.randomUUID(),
       };
       await addSchedule(schedule);
+      reset();
       toast.success("Schedule added successfully");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Unexpected error");

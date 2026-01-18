@@ -4,7 +4,10 @@
   "description": "Block sites by schedule or with Pomodoro to avoid distractions",
   "browser_specific_settings": {
     "gecko": {
-      "id": "oscar.dga@outlook.com"
+      "id": "oscar.dga@outlook.com",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "action": {

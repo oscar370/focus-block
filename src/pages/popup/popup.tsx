@@ -13,14 +13,15 @@ const tabs = [
 ];
 
 export default function Popup() {
-  const { pomodoro } = usePomodoro();
+  const { pomodoro, isLoading } = usePomodoro();
 
-  return (
-    <main className="container px-4 py-3">
-      <Tabs
-        tabs={tabs}
-        defaultTabId={pomodoro.status !== "idle" ? "pomodoro" : "site"}
-      />
-    </main>
-  );
+  if (!isLoading)
+    return (
+      <main className="container px-4 py-3">
+        <Tabs
+          tabs={tabs}
+          defaultTabId={pomodoro.status === "idle" ? "site" : "pomodoro"}
+        />
+      </main>
+    );
 }

@@ -14,15 +14,17 @@ export async function addSchedule(schedule: Schedule) {
   return response;
 }
 
-export async function deleteSchedule(url: string) {
+export async function deleteSchedule(id: string) {
   const response = await api.runtime.sendMessage({
     type: "DELETE_SCHEDULE",
-    url,
+    id,
   });
 
   if (!response?.ok) {
     throw new Error(response?.error ?? "DELETE_SCHEDULE_FAILED");
   }
+
+  console.log(response);
 
   return response;
 }

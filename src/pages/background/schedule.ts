@@ -12,9 +12,11 @@ export async function addSchedule(schedule: Schedule) {
 export async function deleteSchedule(id: string) {
   const { schedules = [] } = (await api.storage.sync.get()) as SyncState;
 
-  const filteredSites = schedules.filter((schedule) => schedule.id !== id);
+  const filteredSchedules = schedules.filter((schedule) => schedule.id !== id);
+
+  console.log(id, schedules, filteredSchedules);
 
   await api.storage.sync.set({
-    schedules: [...filteredSites],
+    schedules: [...filteredSchedules],
   });
 }
