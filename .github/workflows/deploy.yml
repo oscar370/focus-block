@@ -1,4 +1,4 @@
-name: Publish Firefox Addon
+name: Build and Release Extensions
 
 on:
   push:
@@ -6,8 +6,11 @@ on:
       - "v*"
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -16,14 +19,21 @@ jobs:
           node-version: 20
 
       - run: npm ci
+      - run: npm run build
 
-      - run: npm run build:firefox
+      - name: Zip Chrome build
+        run: |
+          cd dist_chrome
+          zip -r ../extension-chrome.zip .
 
-      - run: npm install -g web-ext
+      - name: Zip Firefox build
+        run: |
+          cd dist_firefox
+          zip -r ../extension-firefox.zip .
 
-      - run: |
-          web-ext sign \
-            --source-dir dist \
-            --api-key ${{ secrets.AMO_API_KEY }} \
-            --api-secret ${{ secrets.AMO_API_SECRET }} \
-            --channel listed
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            extension-chrome.zip
+            extension-firefox.zip
