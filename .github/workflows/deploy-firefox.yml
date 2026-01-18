@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -15,9 +16,12 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm ci
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
-      - run: npm run build:firefox
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:firefox
 
       - run: npm install -g web-ext
 
