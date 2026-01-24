@@ -30,7 +30,7 @@ function ContentApp() {
   const { schedules, loading: loadingSchedules } = useSchedules();
   const { pauseUntil } = usePause();
   const [isBlocked, setIsBlocked] = useState(false);
-  const { pomodoro } = usePomodoro();
+  const { pomodoro, pomodoroPauseUntil } = usePomodoro();
 
   useEffect(() => {
     if (loadingSites || loadingSchedules) return;
@@ -46,6 +46,7 @@ function ContentApp() {
         schedules,
         pauseUntil,
         pomodoro,
+        pomodoroPauseUntil,
       );
 
       setIsBlocked(blocked);

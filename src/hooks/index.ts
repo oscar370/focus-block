@@ -121,6 +121,9 @@ export function usePomodoro() {
     status: "idle",
     expiry: null,
   });
+  const [pomodoroPauseUntil, setPomodoroPauseUntil] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
     getPomodoroState().then((value) => {
@@ -128,8 +131,12 @@ export function usePomodoro() {
       setLoading(false);
     });
 
+    getPause().then(setPomodoroPauseUntil);
+
     function handleChange(changes: any) {
       if (changes.pomodoro) setPomodoroState(changes.pomodoro.newValue);
+      if (changes.pomodoroPauseUntil)
+        setPomodoroPauseUntil(changes.pomodoroPauseUntil.newValue);
     }
 
     api.storage.onChanged.addListener(handleChange);
@@ -140,6 +147,13 @@ export function usePomodoro() {
       const { pomodoro = { status: "idle", expiry: null } } =
         (await api.storage.sync.get("pomodoro")) as SyncState;
       return pomodoro;
+    }
+
+    async function getPause() {
+      const { pomodoroPauseUntil = null } = (await api.storage.sync.get(
+        "pomodoroPauseUntil",
+      )) as SyncState;
+      return pomodoroPauseUntil;
     }
   }, []);
 
@@ -156,9 +170,43 @@ export function usePomodoro() {
     await setPomodoro(pomodoro);
     api.alarms.clear("pomodoroTimer");
     api.alarms.clear("badgeTicker");
+    api.alarms.clear("pomodoroResumeTimer");
   }
 
-  return { pomodoro, isLoading, startWork, stopPomodoro };
+  async function pausePomodoro(minutes: number = 5) {
+    const response = await api.runtime.sendMessage({
+      type: "PAUSE_POMODORO",
+      minutes,
+    });
+
+    if (!response?.ok) {
+      throw new Error(response?.error ?? "PAUSE_POMODORO_ERROR");
+    }
+
+    return response;
+  }
+
+  async function resumePomodoro() {
+    const response = await api.runtime.sendMessage({
+      type: "RESUME_POMODORO",
+    });
+
+    if (!response?.ok) {
+      throw new Error(response?.error ?? "RESUME_POMODORO_ERROR");
+    }
+
+    return response;
+  }
+
+  return {
+    pomodoro,
+    isLoading,
+    startWork,
+    stopPomodoro,
+    pausePomodoro,
+    resumePomodoro,
+    pomodoroPauseUntil,
+  };
 }
 
 async function setPomodoro(pomodoro: PomodoroState) {
@@ -172,4 +220,56 @@ async function setPomodoro(pomodoro: PomodoroState) {
   }
 
   return response;
+}
+
+export function useDailyPomodoroCount() {
+  const [count, setCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCount()
+      .then(setCount)
+      .finally(() => setLoading(false));
+
+    // Listen to local storage changes to update count when it changes
+    api.storage.onChanged.addListener(handleChange);
+
+    return () => api.storage.onChanged.removeListener(handleChange);
+
+    async function getCount() {
+      const today = new Date().toISOString().split("T")[0];
+      const data = (await api.storage.local.get("pomodoroDaily")) as Record<
+        string,
+        { date: string; count: number }
+      >;
+      const dailyCount = data.pomodoroDaily;
+
+      if (!dailyCount || dailyCount.date !== today) {
+        return 0;
+      }
+
+      return dailyCount.count;
+    }
+
+    function handleChange(
+      changes: Record<string, chrome.storage.StorageChange>,
+      area: string,
+    ) {
+      if (area === "local" && changes.pomodoroDaily) {
+        const newValue = changes.pomodoroDaily.newValue as {
+          date: string;
+          count: number;
+        };
+        const today = new Date().toISOString().split("T")[0];
+
+        if (newValue && newValue.date === today) {
+          setCount(newValue.count);
+        } else {
+          setCount(0);
+        }
+      }
+    }
+  }, []);
+
+  return { count, loading };
 }

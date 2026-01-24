@@ -5,6 +5,8 @@ import { addBlockedSite, deleteBlockedSite } from "./blocked-sites";
 import { notify } from "./notify";
 import { setPause } from "./pause";
 import { setPomodoro } from "./pomodoro";
+import { incrementPomodoroCount } from "./pomodoro-counter";
+import { pausePomodoro, resumePomodoro } from "./pomodoro-pause";
 import { addSchedule, deleteSchedule } from "./schedule";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -86,6 +88,32 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
       return true;
     }
+
+    case "PAUSE_POMODORO": {
+      pausePomodoro(message.minutes ?? 5)
+        .then(() => sendResponse({ ok: true }))
+        .catch((error) =>
+          sendResponse({
+            ok: false,
+            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+          }),
+        );
+
+      return true;
+    }
+
+    case "RESUME_POMODORO": {
+      resumePomodoro()
+        .then(() => sendResponse({ ok: true }))
+        .catch((error) =>
+          sendResponse({
+            ok: false,
+            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+          }),
+        );
+
+      return true;
+    }
   }
 });
 
@@ -106,6 +134,8 @@ api.alarms.onAlarm.addListener(async (alarm) => {
         };
         notify("break", "Time for a break!", "Good work. You have 5 minutes.");
         api.alarms.create("pomodoroTimer", { delayInMinutes: 5 });
+        // Increment counter when work session completes
+        await incrementPomodoroCount();
       } else {
         nextState = { status: "idle", expiry: null };
         notify(
@@ -127,6 +157,17 @@ api.alarms.onAlarm.addListener(async (alarm) => {
       await updateBadge();
     } catch (error) {
       console.error(`A problem occurred with the badge alarm: ${error}`);
+    }
+  }
+
+  if (alarm.name === "pomodoroResumeTimer") {
+    try {
+      await resumePomodoro();
+      await updateBadge();
+    } catch (error) {
+      console.error(
+        `A problem occurred with the Pomodoro resume alarm: ${error}`,
+      );
     }
   }
 });

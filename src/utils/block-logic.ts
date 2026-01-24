@@ -21,11 +21,17 @@ export function shouldBlock(
   schedules: Schedule[],
   pauseUntil: number | null,
   pomodoro: PomodoroState,
+  pomodoroPauseUntil: number | null = null,
 ): boolean {
   const isSiteListed = blockedSites.some((site) =>
     currentUrl.toLowerCase().includes(site.toLowerCase()),
   );
   if (!isSiteListed) return false;
+
+  // Pomodoro pause takes precedence: if paused, don't block
+  if (pomodoroPauseUntil && Date.now() < pomodoroPauseUntil) {
+    return false;
+  }
 
   if (pomodoro.status === "work") return true;
   if (pomodoro.status === "break") return false;

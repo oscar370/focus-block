@@ -8,6 +8,8 @@ export type SyncState = {
   schedules: Schedule[];
   pauseUntil: number | null;
   pomodoro: PomodoroState;
+  pomodoroPrePause: PomodoroState | null;
+  pomodoroPauseUntil: number | null;
 };
 
 export type Days = {
