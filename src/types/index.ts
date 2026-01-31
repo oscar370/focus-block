@@ -8,6 +8,7 @@ export type SyncState = {
   schedules: Schedule[];
   pauseUntil: number | null;
   pomodoro: PomodoroState;
+  pomodoroCount: PomodoroCount;
   pomodoroPrePause: PomodoroState | null;
   pomodoroPauseUntil: number | null;
 };
@@ -29,3 +30,5 @@ export type Schedule = {
   endTime: string;
   days: Days;
 };
+
+type PomodoroCount = { date: string; count: number };

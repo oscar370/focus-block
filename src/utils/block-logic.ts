@@ -28,7 +28,6 @@ export function shouldBlock(
   );
   if (!isSiteListed) return false;
 
-  // Pomodoro pause takes precedence: if paused, don't block
   if (pomodoroPauseUntil && Date.now() < pomodoroPauseUntil) {
     return false;
   }

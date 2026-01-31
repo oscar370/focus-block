@@ -1,34 +1,30 @@
 import { api } from "@/api";
-import { SyncState } from "@/types";
 
 export async function updateBadge() {
-  const { pomodoro = { status: "idle", expiry: null } } =
-    (await api.storage.sync.get("pomodoro")) as SyncState;
-  const { pomodoroPauseUntil } = (await api.storage.sync.get(
-    "pomodoroPauseUntil",
-  )) as SyncState;
+  const pomodoro = await api.get("pomodoro", { status: "idle", expiry: null });
 
-  // Show pause badge if Pomodoro is paused
+  const pomodoroPauseUntil = await api.get("pomodoroPauseUntil", null);
+
   if (pomodoroPauseUntil && Date.now() < pomodoroPauseUntil) {
     const minutesLeft = Math.ceil((pomodoroPauseUntil - Date.now()) / 60000);
-    api.action.setBadgeText({ text: minutesLeft.toString() });
-    api.action.setBadgeBackgroundColor({ color: "#F59E0B" }); // Amber for pause
+    chrome.action.setBadgeText({ text: minutesLeft.toString() });
+    chrome.action.setBadgeBackgroundColor({ color: "#F59E0B" });
     return;
   }
 
   if (!pomodoro || pomodoro.status === "idle" || !pomodoro.expiry) {
-    api.action.setBadgeText({ text: "" });
+    chrome.action.setBadgeText({ text: "" });
     return;
   }
 
   const minutesLeft = Math.ceil((pomodoro.expiry - Date.now()) / 60000);
 
   if (minutesLeft <= 0) {
-    api.action.setBadgeText({ text: "0" });
+    chrome.action.setBadgeText({ text: "0" });
   } else {
-    api.action.setBadgeText({ text: minutesLeft.toString() });
+    chrome.action.setBadgeText({ text: minutesLeft.toString() });
   }
 
   const color = pomodoro.status === "work" ? "#D93025" : "#1E8E3E";
-  api.action.setBadgeBackgroundColor({ color });
+  chrome.action.setBadgeBackgroundColor({ color });
 }

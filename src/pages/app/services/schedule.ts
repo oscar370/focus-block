@@ -1,8 +1,7 @@
-import { api } from "@/api";
 import { Schedule } from "@/types";
 
 export async function addSchedule(schedule: Schedule) {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "ADD_SCHEDULE",
     schedule,
   });
@@ -15,7 +14,7 @@ export async function addSchedule(schedule: Schedule) {
 }
 
 export async function deleteSchedule(id: string) {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "DELETE_SCHEDULE",
     id,
   });

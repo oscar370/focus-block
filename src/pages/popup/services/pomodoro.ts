@@ -1,7 +1,5 @@
-import { api } from "@/api";
-
 export async function pausePomodoroService(minutes: number = 5) {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "PAUSE_POMODORO",
     minutes,
   });
@@ -14,7 +12,7 @@ export async function pausePomodoroService(minutes: number = 5) {
 }
 
 export async function resumePomodoroService() {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "RESUME_POMODORO",
   });
 

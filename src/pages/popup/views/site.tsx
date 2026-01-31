@@ -1,4 +1,3 @@
-import { api } from "@/api";
 import { useBlockedSites, usePause, usePomodoro, useSchedules } from "@/hooks";
 import { shouldBlock } from "@/utils/block-logic";
 import { useEffect, useState } from "react";
@@ -15,7 +14,7 @@ export function Site() {
   const { pomodoro } = usePomodoro();
 
   useEffect(() => {
-    api.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
       const url = new URL(tabs[0].url || "");
       setCurrentHost(url.hostname);
     });
@@ -53,8 +52,8 @@ export function Site() {
   }
 
   function openOptions() {
-    api.tabs.create({
-      url: api.runtime.getURL("src/pages/app/index.html"),
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("src/pages/app/index.html"),
     });
   }
 

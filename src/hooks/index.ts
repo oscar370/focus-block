@@ -13,22 +13,19 @@ export function useBlockedSites() {
       .catch((err) => setError(err instanceof Error ? err.message : "ERROR"))
       .finally(() => setLoading(false));
 
-    api.storage.onChanged.addListener(handleChange);
+    chrome.storage.onChanged.addListener(handleChange);
 
-    return () => api.storage.onChanged.removeListener(handleChange);
+    return () => chrome.storage.onChanged.removeListener(handleChange);
 
     async function getBlockedSites() {
-      const { blockedSites = [] } = (await api.storage.sync.get(
-        "blockedSites",
-      )) as SyncState;
-      return blockedSites;
+      return await api.get("blockedSites", []);
     }
 
     function handleChange(
       changes: Record<string, chrome.storage.StorageChange>,
       area: string,
     ) {
-      if (area === "sync" && changes.blockedSites) {
+      if (area === "local" && changes.blockedSites) {
         setSites(
           (changes.blockedSites.newValue as SyncState["blockedSites"]) ?? [],
         );
@@ -50,14 +47,12 @@ export function useSchedules() {
       .catch((err) => setError(err instanceof Error ? err.message : "ERROR"))
       .finally(() => setLoading(false));
 
-    api.storage.onChanged.addListener(handleChange);
+    chrome.storage.onChanged.addListener(handleChange);
 
-    return () => api.storage.onChanged.removeListener(handleChange);
+    return () => chrome.storage.onChanged.removeListener(handleChange);
 
     async function getSchedules() {
-      const { schedules = [] } = (await api.storage.sync.get(
-        "schedules",
-      )) as SyncState;
+      const schedules = await api.get("schedules", []);
       return schedules;
     }
 
@@ -65,7 +60,7 @@ export function useSchedules() {
       changes: Record<string, chrome.storage.StorageChange>,
       area: string,
     ) {
-      if (area === "sync" && changes.schedules) {
+      if (area === "local" && changes.schedules) {
         setSchedules(
           (changes.schedules.newValue as SyncState["schedules"]) ?? [],
         );
@@ -82,25 +77,29 @@ export function usePause() {
   useEffect(() => {
     getPauseUntil().then(setPauseUntil);
 
-    api.storage.onChanged.addListener(handleChange);
+    chrome.storage.onChanged.addListener(handleChange);
 
-    return () => api.storage.onChanged.removeListener(handleChange);
+    return () => chrome.storage.onChanged.removeListener(handleChange);
 
     async function getPauseUntil() {
-      const { pauseUntil } = (await api.storage.sync.get(
-        "pauseUntil",
-      )) as SyncState;
+      const pauseUntil = await api.get("pauseUntil", null);
       return pauseUntil;
     }
 
-    function handleChange(changes: any) {
-      if (changes.pauseUntil) setPauseUntil(changes.pauseUntil.newValue);
+    function handleChange(
+      changes: Record<string, chrome.storage.StorageChange>,
+      area: string,
+    ) {
+      if (area === "local" && changes.schedules)
+        setPauseUntil(
+          (changes.pauseUntil.newValue as SyncState["pauseUntil"]) ?? null,
+        );
     }
   }, []);
 
   async function startPause(minutes: number) {
     const time = Date.now() + minutes * 60000;
-    const response = await api.runtime.sendMessage({
+    const response = await chrome.runtime.sendMessage({
       type: "SET_PAUSE",
       time,
     });
@@ -139,21 +138,16 @@ export function usePomodoro() {
         setPomodoroPauseUntil(changes.pomodoroPauseUntil.newValue);
     }
 
-    api.storage.onChanged.addListener(handleChange);
+    chrome.storage.onChanged.addListener(handleChange);
 
-    return () => api.storage.onChanged.removeListener(handleChange);
+    return () => chrome.storage.onChanged.removeListener(handleChange);
 
     async function getPomodoroState() {
-      const { pomodoro = { status: "idle", expiry: null } } =
-        (await api.storage.sync.get("pomodoro")) as SyncState;
-      return pomodoro;
+      return await api.get("pomodoro", { status: "idle", expiry: null });
     }
 
     async function getPause() {
-      const { pomodoroPauseUntil = null } = (await api.storage.sync.get(
-        "pomodoroPauseUntil",
-      )) as SyncState;
-      return pomodoroPauseUntil;
+      return await api.get("pomodoroPauseUntil", null);
     }
   }, []);
 
@@ -161,20 +155,20 @@ export function usePomodoro() {
     const expiry = Date.now() + 25 * 60000;
     const pomodoro: PomodoroState = { status: "work", expiry };
     await setPomodoro(pomodoro);
-    api.alarms.create("pomodoroTimer", { delayInMinutes: 25 });
-    api.alarms.create("badgeTicker", { periodInMinutes: 1 });
+    chrome.alarms.create("pomodoroTimer", { delayInMinutes: 25 });
+    chrome.alarms.create("badgeTicker", { periodInMinutes: 1 });
   }
 
   async function stopPomodoro() {
     const pomodoro: PomodoroState = { status: "idle", expiry: null };
     await setPomodoro(pomodoro);
-    api.alarms.clear("pomodoroTimer");
-    api.alarms.clear("badgeTicker");
-    api.alarms.clear("pomodoroResumeTimer");
+    chrome.alarms.clear("pomodoroTimer");
+    chrome.alarms.clear("badgeTicker");
+    chrome.alarms.clear("pomodoroResumeTimer");
   }
 
   async function pausePomodoro(minutes: number = 5) {
-    const response = await api.runtime.sendMessage({
+    const response = await chrome.runtime.sendMessage({
       type: "PAUSE_POMODORO",
       minutes,
     });
@@ -187,7 +181,7 @@ export function usePomodoro() {
   }
 
   async function resumePomodoro() {
-    const response = await api.runtime.sendMessage({
+    const response = await chrome.runtime.sendMessage({
       type: "RESUME_POMODORO",
     });
 
@@ -210,7 +204,7 @@ export function usePomodoro() {
 }
 
 async function setPomodoro(pomodoro: PomodoroState) {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "SET_POMODORO",
     pomodoro,
   });
@@ -231,24 +225,22 @@ export function useDailyPomodoroCount() {
       .then(setCount)
       .finally(() => setLoading(false));
 
-    // Listen to local storage changes to update count when it changes
-    api.storage.onChanged.addListener(handleChange);
+    chrome.storage.onChanged.addListener(handleChange);
 
-    return () => api.storage.onChanged.removeListener(handleChange);
+    return () => chrome.storage.onChanged.removeListener(handleChange);
 
     async function getCount() {
       const today = new Date().toISOString().split("T")[0];
-      const data = (await api.storage.local.get("pomodoroDaily")) as Record<
-        string,
-        { date: string; count: number }
-      >;
-      const dailyCount = data.pomodoroDaily;
+      const pomodoroCount = await api.get("pomodoroCount", {
+        date: "",
+        count: 0,
+      });
 
-      if (!dailyCount || dailyCount.date !== today) {
+      if (pomodoroCount.date !== today) {
         return 0;
       }
 
-      return dailyCount.count;
+      return pomodoroCount.count;
     }
 
     function handleChange(
@@ -256,10 +248,8 @@ export function useDailyPomodoroCount() {
       area: string,
     ) {
       if (area === "local" && changes.pomodoroDaily) {
-        const newValue = changes.pomodoroDaily.newValue as {
-          date: string;
-          count: number;
-        };
+        const newValue = changes.pomodoroDaily
+          .newValue as SyncState["pomodoroCount"];
         const today = new Date().toISOString().split("T")[0];
 
         if (newValue && newValue.date === today) {

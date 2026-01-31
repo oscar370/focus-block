@@ -16,7 +16,6 @@ export default function Pomodoro() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // Timer for main Pomodoro display
       if (!pomodoro.expiry) return;
 
       const diff = pomodoro.expiry - Date.now();
@@ -35,7 +34,6 @@ export default function Pomodoro() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      // Timer for pause display
       if (!pomodoroPauseUntil) {
         setIsPaused(false);
         setPauseTimeLeft("");
@@ -103,13 +101,9 @@ export default function Pomodoro() {
 
             <h2 className="text-5xl! m-0! font-mono">{pauseTimeLeft}</h2>
 
-            <div className="flex gap-2 w-full">
+            <div className="flex w-full">
               <button onClick={handleResume} className="flex-1">
                 Resume
-              </button>
-
-              <button onClick={stopPomodoro} className="secondary flex-1">
-                Cancel
               </button>
             </div>
           </div>

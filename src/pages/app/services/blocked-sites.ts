@@ -1,7 +1,5 @@
-import { api } from "@/api";
-
 export async function addBlockedSite(url: string) {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "ADD_BLOCKED_SITE",
     url,
   });
@@ -14,7 +12,7 @@ export async function addBlockedSite(url: string) {
 }
 
 export async function deleteBlockedSite(url: string) {
-  const response = await api.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     type: "DELETE_BLOCKED_SITE",
     url,
   });

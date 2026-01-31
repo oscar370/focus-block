@@ -1,129 +1,132 @@
 import { api } from "@/api";
-import { PomodoroState, SyncState } from "@/types";
+import { PomodoroState } from "@/types";
 import { updateBadge } from "./badge";
 import { addBlockedSite, deleteBlockedSite } from "./blocked-sites";
 import { notify } from "./notify";
 import { setPause } from "./pause";
-import { setPomodoro } from "./pomodoro";
-import { incrementPomodoroCount } from "./pomodoro-counter";
-import { pausePomodoro, resumePomodoro } from "./pomodoro-pause";
+import {
+  incrementPomodoroCount,
+  pausePomodoro,
+  resumePomodoro,
+  setPomodoro,
+} from "./pomodoro";
 import { addSchedule, deleteSchedule } from "./schedule";
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  switch (message.type) {
-    case "ADD_BLOCKED_SITE": {
-      addBlockedSite(message.url)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === "ADD_BLOCKED_SITE") {
+    addBlockedSite(message.url)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "DELETE_BLOCKED_SITE": {
-      deleteBlockedSite(message.url)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "DELETE_BLOCKED_SITE") {
+    deleteBlockedSite(message.url)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "ADD_SCHEDULE": {
-      addSchedule(message.schedule)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "ADD_SCHEDULE") {
+    addSchedule(message.schedule)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "DELETE_SCHEDULE": {
-      deleteSchedule(message.id)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "DELETE_SCHEDULE") {
+    deleteSchedule(message.id)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "SET_PAUSE": {
-      setPause(message.time)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "SET_PAUSE") {
+    setPause(message.time)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "SET_POMODORO": {
-      setPomodoro(message.pomodoro)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "SET_POMODORO") {
+    setPomodoro(message.pomodoro)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "PAUSE_POMODORO": {
-      pausePomodoro(message.minutes ?? 5)
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "PAUSE_POMODORO") {
+    pausePomodoro(message.minutes ?? 5)
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
+  }
 
-    case "RESUME_POMODORO": {
-      resumePomodoro()
-        .then(() => sendResponse({ ok: true }))
-        .catch((error) =>
-          sendResponse({
-            ok: false,
-            error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
-          }),
-        );
+  if (message.type === "RESUME_POMODORO") {
+    resumePomodoro()
+      .then(() => sendResponse({ ok: true }))
+      .catch((error) =>
+        sendResponse({
+          ok: false,
+          error: error instanceof Error ? error.message : "UNKNOWN_ERROR",
+        }),
+      );
 
-      return true;
-    }
+    return true;
   }
 });
 
-api.alarms.onAlarm.addListener(async (alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === "pomodoroTimer") {
     try {
-      const { pomodoro } = (await api.storage.sync.get(
-        "pomodoro",
-      )) as SyncState;
-      if (!pomodoro || pomodoro.status === "idle") return;
+      const pomodoro = await api.get("pomodoro", {
+        status: "idle",
+        expiry: null,
+      });
+
+      if (pomodoro.status === "idle") return;
 
       let nextState: PomodoroState;
 
@@ -132,9 +135,10 @@ api.alarms.onAlarm.addListener(async (alarm) => {
           status: "break",
           expiry: Date.now() + 5 * 60000,
         };
+
         notify("break", "Time for a break!", "Good work. You have 5 minutes.");
-        api.alarms.create("pomodoroTimer", { delayInMinutes: 5 });
-        // Increment counter when work session completes
+        chrome.alarms.create("pomodoroTimer", { delayInMinutes: 5 });
+
         await incrementPomodoroCount();
       } else {
         nextState = { status: "idle", expiry: null };
@@ -172,7 +176,7 @@ api.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
-api.notifications.onButtonClicked.addListener(
+chrome.notifications.onButtonClicked.addListener(
   async (notificationId, buttonIndex) => {
     if (notificationId === "break-over" && buttonIndex === 0) {
       await startNextPomodoro(notificationId);
@@ -180,7 +184,7 @@ api.notifications.onButtonClicked.addListener(
   },
 );
 
-api.notifications.onClicked.addListener(async (notificationId) => {
+chrome.notifications.onClicked.addListener(async (notificationId) => {
   if (notificationId === "break-over") {
     await startNextPomodoro(notificationId);
   }
@@ -192,7 +196,21 @@ async function startNextPomodoro(notificationId: string) {
 
   await setPomodoro({ status: "work", expiry });
 
-  api.alarms.create("pomodoroTimer", { delayInMinutes: minutes });
-  api.alarms.create("badgeTicker", { periodInMinutes: 1 });
-  api.notifications.clear(notificationId);
+  chrome.alarms.create("pomodoroTimer", { delayInMinutes: minutes });
+  chrome.alarms.create("badgeTicker", { periodInMinutes: 1 });
+  chrome.notifications.clear(notificationId);
 }
+
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area !== "sync") return;
+
+  const patch: Record<string, unknown> = {};
+
+  for (const key in changes) {
+    patch[key] = changes[key].newValue;
+  }
+
+  if (Object.keys(patch).length > 0) {
+    chrome.storage.local.set(patch);
+  }
+});
