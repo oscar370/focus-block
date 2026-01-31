@@ -23,9 +23,10 @@ export function shouldBlock(
   pomodoro: PomodoroState,
   pomodoroPauseUntil: number | null = null,
 ): boolean {
-  const isSiteListed = blockedSites.some((site) =>
-    currentUrl.toLowerCase().includes(site.toLowerCase()),
+  const isSiteListed = blockedSites.some(
+    (site) => currentUrl.toLowerCase() === site.toLowerCase(),
   );
+
   if (!isSiteListed) return false;
 
   if (pomodoroPauseUntil && Date.now() < pomodoroPauseUntil) {

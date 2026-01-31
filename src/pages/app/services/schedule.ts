@@ -23,7 +23,5 @@ export async function deleteSchedule(id: string) {
     throw new Error(response?.error ?? "DELETE_SCHEDULE_FAILED");
   }
 
-  console.log(response);
-
   return response;
 }
