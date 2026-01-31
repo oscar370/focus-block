@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.4] - 2026-01-31
+
+- The comparison of sites has been fixed.
+
 ## [1.0.3] - 2026-01-31
 
 - Local synchronization was implemented in parallel to reduce latency.
