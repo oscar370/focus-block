@@ -36,9 +36,14 @@ jobs:
           cd dist_firefox
           zip -r ../extension-firefox.zip .
 
+      - name: Read changelog
+        run: |
+          awk '/^## /{i++}i==1{print}' CHANGELOG.md > release_notes.txt
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: release_notes.txt
           files: |
             extension-chrome.zip
             extension-firefox.zip
