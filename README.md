@@ -32,7 +32,6 @@ The extension is available for direct installation via the Chrome Web Store and 
 
 - **Runtime**: Vite + Node.js with **pnpm**.
 - **Frontend**: React + TailwindCSS + PicoCSS.
-- **Communication**: Asynchronous messaging system optimized to prevent premature port closure in Chromium.
 
 ### Terminal Commands
 
@@ -56,3 +55,4 @@ Production build:
 pnpm run build
 
 ```
+
