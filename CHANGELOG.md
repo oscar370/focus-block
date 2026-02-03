@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.0.5] - 2026-02-02
+
+- The Pomodoro timer reset has been improved.
+
 ## [1.0.4] - 2026-01-31
 
 - The comparison of sites has been fixed.
