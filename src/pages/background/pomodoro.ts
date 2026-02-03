@@ -10,14 +10,16 @@ export async function setPomodoro(pomodoro: PomodoroState) {
 }
 
 function getLocalDayKey() {
-  return new Date().toLocaleDateString("sv-SE", {
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  });
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 export async function incrementPomodoroCount() {
   const currentDate = getLocalDayKey();
-  const pomodoroCount = await api.get("pomodoroCount", { date: "", count: 0 });
+  const pomodoroCount = await api.get("pomodoroCount", {
+    date: currentDate,
+    count: 0,
+  });
 
   if (pomodoroCount.date !== currentDate) {
     await api.sync({ pomodoroCount: { date: currentDate, count: 1 } });
@@ -33,12 +35,7 @@ export async function incrementPomodoroCount() {
 }
 
 export async function getDailyCount() {
-  const currentDate = getLocalDayKey();
   const pomodoroCount = await api.get("pomodoroCount", { date: "", count: 0 });
-
-  if (pomodoroCount.date !== currentDate) {
-    return 0;
-  }
 
   return pomodoroCount.count;
 }
